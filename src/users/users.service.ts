@@ -13,34 +13,29 @@ export class UsersService {
         private readonly userRepository: Repository<User>,
     ) {}
 
-    async findByNickname(nickname: string): Promise<User> {
+    async findByNickname(nickname: string): Promise<User | null> {
         const user = await this.userRepository.findOne({ where: { nickname } });
-        if (!user) {
-            throw new NotFoundException(`Користувача з ніком "${nickname}" не знайдено`);
-        }
         return user;
     }
-    async findById(id: number): Promise<User> {
+    async findById(id: number): Promise<User | null> {
         const user = await this.userRepository.findOne({ where: { id } });
-        if (!user) {
-            throw new NotFoundException(`Користувача з id=${id} не знайдено`);
-        }
         return user;
     }
     async validateUserPassword(nickname: string, password: string): Promise<User> {
         const user = await this.findByNickname(nickname);
-
+        if (!user) {
+            throw new UnauthorizedException();
+        }
         const isPasswordValid = await bcryptjs.compare(password, user.password);
         if (!isPasswordValid) {
             throw new UnauthorizedException('Невірний пароль');
         }
-
         return user;
     }
     async updateUserProfile(id: number, dto: UpdateProfileDto): Promise<User> {
         const user = await this.findById(id);
-
-        Object.assign(user, dto);
+        if (user )Object.assign(user, dto);
+        else throw new UnauthorizedException();
         return this.userRepository.save(user);
     }
 
