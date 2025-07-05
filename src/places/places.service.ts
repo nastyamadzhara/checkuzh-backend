@@ -1,15 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import {BadRequestException, Injectable, NotFoundException, UseGuards} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Place } from './place.entity';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom } from 'rxjs';
+import { PlaceRating } from "./place-rating.entity";
+import { User} from "../users/user.entity";
+import {AuthGuard} from "@nestjs/passport";
 
 @Injectable()
 export class PlacesService {
     constructor(
         @InjectRepository(Place)
         private placeRepository: Repository<Place>,
+        @InjectRepository(PlaceRating)
+        private placeRatingRepository: Repository<PlaceRating>,
+        @InjectRepository(User)
+        private userRepository: Repository<User>,
         private readonly httpService: HttpService,
     ) {}
 
@@ -200,4 +207,42 @@ export class PlacesService {
             where: { category: 'statue' },
         });
     }
+    async ratePlace(placeId: number, userId: number, rating: number): Promise<{ message: string }> {
+        if (rating < 1 || rating > 5) {
+            throw new BadRequestException('Rating must be between 1 and 5');
+        }
+
+        const place = await this.placeRepository.findOne({ where: { id: placeId } });
+        if (!place) throw new NotFoundException('Place not found');
+
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+        if (!user) throw new NotFoundException('User not found');
+
+        let ratingRecord = await this.placeRatingRepository.findOne({
+            where: { user: { id: userId }, place: { id: placeId } },
+            relations: ['user', 'place'],
+        });
+
+        if (ratingRecord) {
+            ratingRecord.rating = rating;
+        } else {
+            ratingRecord = this.placeRatingRepository.create({
+                user: { id: userId } as User,
+                place: { id: placeId } as Place,
+                rating,
+            });
+        }
+
+        await this.placeRatingRepository.save(ratingRecord);
+
+        // Оновлюємо середній рейтинг місця
+        const allRatings = await this.placeRatingRepository.find({ where: { place: { id: placeId } } });
+        const avg = allRatings.reduce((sum, r) => sum + r.rating, 0) / allRatings.length;
+        place.rating = Math.round(avg * 10) / 10;
+
+        await this.placeRepository.save(place);
+
+        return { message: 'Rating saved' };
+    }
+
 }

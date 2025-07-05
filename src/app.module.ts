@@ -5,6 +5,7 @@ import config from './configuration/config';
 import {UsersModule} from "./users/users.module";
 import {AuthModule} from "./auth/auth.module";
 import {PlacesModule} from "./places/places.module";
+import {QuestModule} from "./quest/quest.module";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import {PlacesModule} from "./places/places.module";
     UsersModule,
     AuthModule,
     PlacesModule,
+    QuestModule
   ],
 })
 export class AppModule {}

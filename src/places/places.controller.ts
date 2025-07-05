@@ -1,8 +1,11 @@
 // src/places/places.controller.ts
-import {Controller, Get, Post, Param, Body, Patch, Delete} from '@nestjs/common';
+import {Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Req} from '@nestjs/common';
 import { PlacesService } from './places.service';
 import { CreatePlaceDto } from './dto/create-place.dto';
 import {UpdatePlaceDto} from "./dto/update-place.dto.";
+import {AuthGuard} from "@nestjs/passport";
+import {GetUser} from "../common/decorators/get-user.decorator";
+import {User} from "../users/user.entity";
 
 @Controller('places')
 export class PlacesController {
@@ -36,10 +39,14 @@ export class PlacesController {
         return this.placesService.updatePlace(+id, updateDto);
     }
 
-
-
     @Delete(':id')
     remove(@Param('id') id: string) {
         return this.placesService.removePlace(+id);
+    }
+
+    @Post(':id/rate')
+    @UseGuards(AuthGuard('jwt'))
+    ratePlace(@Param('id') id: string, @GetUser() user: User, @Body() body: { rating: number }) {
+        return this.placesService.ratePlace(+id, user.id, body.rating);
     }
 }

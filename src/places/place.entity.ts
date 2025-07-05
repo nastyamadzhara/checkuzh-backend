@@ -36,7 +36,7 @@ export class Place {
     @Column({ default: 0 })
     likes: number;
 
-    @ManyToMany(() => User, user => user.favorites, { cascade: true })
+    @ManyToMany(() => User, user => user.favorites)
     favoritedBy: User[];
 
     @Column()
