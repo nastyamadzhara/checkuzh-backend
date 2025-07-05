@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from 'typeorm';
 import {UserType} from "./dto/update-profile.dto";
+import {Place} from "../places/place.entity";
 
 @Entity()
 export class User {
@@ -36,4 +37,8 @@ export class User {
 
     @Column({ default: 0 })
     questProgress: number;
+
+    @ManyToMany(() => Place, place => place.favoritedBy)
+    @JoinTable()
+    favorites: Place[];
 }
