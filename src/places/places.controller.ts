@@ -1,7 +1,5 @@
-// src/places/places.controller.ts
-import {Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Req} from '@nestjs/common';
+import {Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Req, Query} from '@nestjs/common';
 import { PlacesService } from './places.service';
-import { CreatePlaceDto } from './dto/create-place.dto';
 import {UpdatePlaceDto} from "./dto/update-place.dto.";
 import {AuthGuard} from "@nestjs/passport";
 import {GetUser} from "../common/decorators/get-user.decorator";
@@ -12,13 +10,22 @@ export class PlacesController {
     constructor(private readonly placesService: PlacesService) {}
 
     @Get()
-    findAll() {
-        return this.placesService.findAll();
+    findAll(
+        @Query('category') category?: string,
+        @Query('page') page = 1,
+        @Query('limit') limit = 20,
+    ) {
+        return this.placesService.findAll({ category, page: +page, limit: +limit });
     }
 
     @Get('statues')
     getStatues() {
         return this.placesService.findStatues();
+    }
+
+    @Get('categories')
+    getCategories() {
+        return this.placesService.getCategories();
     }
 
     @Get(':id')

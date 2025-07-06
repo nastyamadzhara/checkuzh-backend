@@ -71,4 +71,24 @@ export class QuestService {
             foundPlaces: places,
         };
     }
+    async getUserQuestById(userId: number) {
+        const progress = await this.questProgressRepository.find({
+            where: { user: { id: userId } },
+            relations: ['place'],
+        });
+
+        const total = await this.placeRepository.count({ where: { category: 'statue' } });
+
+        const found = progress.length;
+        const places = progress.map(p => p.place);
+
+        return {
+            userId,
+            total,
+            found,
+            percentage: total > 0 ? Math.round((found / total) * 100) : 0,
+            foundPlaces: places,
+        };
+    }
+
 }

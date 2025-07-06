@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, UseGuards } from '@nestjs/common';
+import {Controller, Get, Post, Body, Query, UseGuards, Param} from '@nestjs/common';
 import { QuestService } from './quest.service';
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from '../users/user.entity';
@@ -29,4 +29,10 @@ export class QuestController {
     getUserQuest(@GetUser() user: User) {
         return this.questService.getUserQuest(user);
     }
+
+    @Get('user/:userId')
+    getUserQuestById(@Param('userId') userId: string) {
+        return this.questService.getUserQuestById(+userId);
+    }
+
 }

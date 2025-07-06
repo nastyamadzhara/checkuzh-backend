@@ -20,8 +20,24 @@ export class PlacesService {
         private readonly httpService: HttpService,
     ) {}
 
-    async findAll(): Promise<Place[]> {
-        return this.placeRepository.find();
+    async findAll(params: { category?: string; page?: number; limit?: number }) {
+        const { category, page = 1, limit = 20 } = params;
+        const whereClause = category ? { category } : {};
+        const [items, total] = await this.placeRepository.findAndCount({
+            where: whereClause,
+            skip: (page - 1) * limit,
+            take: limit,
+            order: { id: 'ASC' },
+        });
+        return {
+            items,
+            total,
+            page,
+            limit,
+        };
+    }
+    async getCategories(): Promise<string[]> {
+        return ['statue', 'museum', 'theatre', 'park', 'historic'];
     }
 
     async findById(id: number): Promise<Place | null> {
