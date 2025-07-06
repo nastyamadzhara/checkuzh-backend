@@ -1,4 +1,4 @@
-import {Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Req, Query} from '@nestjs/common';
+import {Controller, Get, Post, Param, Body, Patch, Delete, UseGuards, Req, Query, ParseIntPipe} from '@nestjs/common';
 import { PlacesService } from './places.service';
 import {UpdatePlaceDto} from "./dto/update-place.dto.";
 import {AuthGuard} from "@nestjs/passport";
@@ -8,6 +8,11 @@ import {User} from "../users/user.entity";
 @Controller('places')
 export class PlacesController {
     constructor(private readonly placesService: PlacesService) {}
+
+    @Get('all')
+    getAllPlaces() {
+        return this.placesService.findAllWithoutPagination();
+    }
 
     @Get()
     findAll(
@@ -29,8 +34,8 @@ export class PlacesController {
     }
 
     @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.placesService.findById(+id);
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        return this.placesService.findById(id);
     }
 
     @Post('/import/osm')

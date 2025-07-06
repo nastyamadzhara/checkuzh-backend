@@ -36,6 +36,13 @@ export class PlacesService {
             limit,
         };
     }
+
+    async findAllWithoutPagination(): Promise<Place[]> {
+        return this.placeRepository.find({
+            order: { id: 'ASC' },
+        });
+    }
+
     async getCategories(): Promise<string[]> {
         return ['statue', 'museum', 'theatre', 'park', 'historic'];
     }
