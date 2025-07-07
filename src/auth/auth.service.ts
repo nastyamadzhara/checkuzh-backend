@@ -38,7 +38,6 @@ export class AuthService {
         }
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);
-        this.clearRefreshCookie(res);
         this.setRefreshCookie(res, refreshToken);
         return { accessToken };
     }
